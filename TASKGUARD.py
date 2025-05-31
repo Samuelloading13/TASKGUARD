@@ -27,44 +27,80 @@ task = muat_task()
 
 def tambah_tugas():
     print("=== Tambah Tugas ===")
+    print("Ketik 'batal' kapan saja untuk membatalkan penambahan tugas\n")
+    
     while True:
-        nama = input(("Nama Tugas: "))
-        if nama =="":
-            print("Nama Tidak Boleh Kosong")
+        nama = input("Nama Tugas: ").strip()
+        if nama.lower() == 'batal':
+            print("Penambahan tugas dibatalkan")
+            return
+        if nama == "":
+            print("Nama tidak boleh kosong")
         elif nama.isdigit():
-            print("Nama Tidak Boleh Angka Saja")
+            print("Nama tidak boleh angka saja")
         else:
             break
             
     while True:
-        klasifikasi = input(("Klasifikasi Tugas, Pilih(Tugas harian, UTS, UAS): "))
+        print("\nPilihan klasifikasi: Tugas harian, UTS, UAS")
+        klasifikasi = input("Klasifikasi Tugas: ").strip()
+        if klasifikasi.lower() == 'batal':
+            print("Penambahan tugas dibatalkan")
+            return
         if klasifikasi == "":
-            print("Klasifikasi Tidak Boleh Kosong")
+            print("Klasifikasi tidak boleh kosong")
         elif klasifikasi.isdigit():
-            print("Klasifikasi Tidak Boleh Berupa Angka")
+            print("Klasifikasi tidak boleh berupa angka")
+        elif klasifikasi.lower() not in ['tugas harian', 'uts', 'uas']:
+            print("Pilihan tidak valid. Harap pilih dari: Tugas harian, UTS, UAS")
         else:
             break
+
     while True:
-        deadline = input("Deadline Tugas, Format(DD-MM-YYYY): ")
+        deadline = input("\nDeadline (DD-MM-YYYY): ").strip()
+        if deadline.lower() == 'batal':
+            print("Penambahan tugas dibatalkan")
+            return
         if deadline == "":
-            print("Deadline Tidak Boleh Kosong")
+            print("Deadline tidak boleh kosong")
             continue
-        
         try:
             datetime.strptime(deadline, '%d-%m-%Y')
             break
         except ValueError:
-            print("Format tanggal tidak valid. Gunakan format DD-MM-YYYY")
+            print("Format tanggal tidak valid. Gunakan DD-MM-YYYY")
 
     while True:
-        tingkat_kesulitan = input(("Tingkat Kesulitan, Pilih(mudah,sedang,susah): "))
+        print("\nPilihan tingkat kesulitan: mudah, sedang, susah")
+        tingkat_kesulitan = input("Tingkat Kesulitan: ").strip()
+        if tingkat_kesulitan.lower() == 'batal':
+            print("Penambahan tugas dibatalkan")
+            return
         if tingkat_kesulitan == "":
-            print("Tingkat Kesulitan Tidak Boleh Kosong")
+            print("Tingkat kesulitan tidak boleh kosong")
         elif tingkat_kesulitan.isdigit():
-            print("Tingkat Kesulitan Tidak Boleh Berupa Angka")
+            print("Tingkat kesulitan tidak boleh berupa angka")
+        elif tingkat_kesulitan.lower() not in ['mudah', 'sedang', 'susah']:
+            print("Pilihan tidak valid. Harap pilih dari: mudah, sedang, susah")
         else:
             break
+
+    print(f"\nRingkasan Tugas:")
+    print(f"Nama: {nama}")
+    print(f"Klasifikasi: {klasifikasi}")
+    print(f"Deadline: {deadline}")
+    print(f"Tingkat Kesulitan: {tingkat_kesulitan}")
     
+    while True:
+        konfirmasi = input("\nSimpan tugas ini? (ya/tidak): ").lower()
+        if konfirmasi == 'batal' or konfirmasi == 'tidak':
+            print("Penambahan tugas dibatalkan")
+            return
+        elif konfirmasi == 'ya':
+            break
+        else:
+            print("Pilihan tidak valid. Ketik 'ya' atau 'tidak'")
+
     tugas = {
         "nama": nama,
         "klasifikasi": klasifikasi,
@@ -74,16 +110,29 @@ def tambah_tugas():
     
     task.append(tugas)
     simpan_tugas(task)
-    print("Tugas Berhasil Ditambahkan")
+    print("\n✓ Tugas berhasil ditambahkan")
     
 def lihat_tugas():
-    print("=== Daftar Tugas ===")
+    print("\nDAFTAR TUGAS")
+    print("=" * 70)
     if not task:
-        print("Tidak Ada Tugas")
+        print("Tidak ada tugas yang tersedia")
+        print("=" * 70)
         return
-    for i, tugas in enumerate(task):
-        print(f"{i+1}. Nama: {tugas['nama']} | Klasifikasi: {tugas['klasifikasi']} | Deadline: {tugas['deadline']} | Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
+
+    print(f"{'No.':<4} | {'Nama Tugas':<20} | {'Klasifikasi':<12} | {'Deadline':<10} | {'Kesulitan':<10}")
+    print("-" * 70)
+
+    for i, tugas in enumerate(task, 1):
+        nama = tugas['nama'][:18] + '..' if len(tugas['nama']) > 20 else tugas['nama']
+        klasifikasi = tugas['klasifikasi'][:10] + '..' if len(tugas['klasifikasi']) > 12 else tugas['klasifikasi']
+        deadline = tugas['deadline']
+        kesulitan = tugas['tingkat kesulitan'][:8] + '..' if len(tugas['tingkat kesulitan']) > 10 else tugas['tingkat kesulitan']
         
+        print(f"{i:<4} | {nama:<20} | {klasifikasi:<12} | {deadline:<10} | {kesulitan:<10}")
+    
+    print("=" * 70)
+
 def edit_tugas():
     lihat_tugas()
     if not task:
@@ -135,7 +184,7 @@ def submenu_pencatatan():
         print("2. Lihat Tugas")
         print("3. Edit Tugas")
         print("4. Hapus Tugas")
-        print("5. Exit")
+        print("5. Kembali ke Menu Utama")
         
         pilihan = input("Pilih (1-5): ")
         
@@ -150,13 +199,116 @@ def submenu_pencatatan():
         elif pilihan == '4':
             hapus_tugas()
         elif pilihan == '5':
-            return
+            break
         else:
             print("Input Tidak Valid")
             
-        input("Tekan Enter untuk melanjutkan")
+        if pilihan != '5':
+            input("Tekan Enter untuk melanjutkan")
 
-# def pengurutan_dan_prioritas_tugas():
+def pengurutan_dan_prioritas_tugas():
+    clear_screen()
+    print("=== PENGURUTAN DAN PRIORITAS TUGAS ===")
+    
+    if not task:
+        print("Tidak ada tugas yang tersedia.")
+        input("\nTekan Enter untuk kembali ke menu utama...")
+        return
+
+    tugas_dengan_bobot = hitung_bobot_tugas(task)
+
+    tugas_terurut = quick_sort_tugas(tugas_dengan_bobot)
+    
+    tampilkan_tugas_terurut(tugas_terurut)
+    
+    return
+
+def hitung_bobot_tugas(tugas_list):
+    hari_ini = datetime.now().date()
+    tugas_dengan_bobot = []
+    
+    for tugas in tugas_list:
+        try:
+            deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
+            selisih_hari = (deadline_date - hari_ini).days
+            
+            if tugas['tingkat kesulitan'].lower() == 'susah':
+                bobot_kesulitan = 3
+            elif tugas['tingkat kesulitan'].lower() == 'sedang':
+                bobot_kesulitan = 2
+            else:
+                bobot_kesulitan = 1
+            
+            if tugas['klasifikasi'].lower() == 'uas':
+                bobot_klasifikasi = 3
+            elif tugas['klasifikasi'].lower() == 'uts':
+                bobot_klasifikasi = 2
+            else:
+                bobot_klasifikasi = 1
+
+            if selisih_hari <= 0:
+                bobot_deadline = 5
+            elif selisih_hari <= 3: 
+                bobot_deadline = 4
+            elif selisih_hari <= 7: 
+                bobot_deadline = 3
+            elif selisih_hari <= 14:
+                bobot_deadline = 2
+            else:
+                bobot_deadline = 1
+
+            total_bobot = (bobot_kesulitan * 0.4) + (bobot_klasifikasi * 0.3) + (bobot_deadline * 0.3)
+
+            tugas_dengan_bobot.append({
+                'tugas': tugas,
+                'bobot': total_bobot,
+                'detail_bobot': {
+                    'kesulitan': bobot_kesulitan,
+                    'klasifikasi': bobot_klasifikasi,
+                    'deadline': bobot_deadline
+                },
+                'hari_menuju_deadline': selisih_hari
+            })
+            
+        except ValueError:
+            print(f"Format deadline tidak valid untuk tugas: {tugas['nama']}")
+            continue
+    
+    return tugas_dengan_bobot
+
+def quick_sort_tugas(tugas_list):
+    if len(tugas_list) <= 1:
+        return tugas_list
+    
+    pivot = tugas_list[len(tugas_list) // 2]
+    left = [x for x in tugas_list if x['bobot'] > pivot['bobot']]
+    middle = [x for x in tugas_list if x['bobot'] == pivot['bobot']]
+    right = [x for x in tugas_list if x['bobot'] < pivot['bobot']]
+    
+    return quick_sort_tugas(left) + middle + quick_sort_tugas(right)
+
+def tampilkan_tugas_terurut(tugas_terurut):
+    print("\nDAFTAR TUGAS BERDASARKAN PRIORITAS")
+    print("=" * 105)
+    print(f"{'No.':<4} | {'Nama Tugas':<25} | {'Klasifikasi':<12} | {'Deadline':<10} | {'Kesulitan':<8} | {'Hari':<6} | {'Bobot':<6} | Detail Bobot")
+    print("-" * 105)
+    
+    for i, tugas in enumerate(tugas_terurut, 1):
+        nama = (tugas['tugas']['nama'][:22] + '..') if len(tugas['tugas']['nama']) > 24 else tugas['tugas']['nama']
+        klasifikasi = tugas['tugas']['klasifikasi'][:10] + ('..' if len(tugas['tugas']['klasifikasi']) > 10 else '')
+        deadline = tugas['tugas']['deadline']
+        kesulitan = tugas['tugas']['tingkat kesulitan'][:6]
+        hari_menuju = f"{tugas['hari_menuju_deadline']}h" if tugas['hari_menuju_deadline'] >= 0 else f"-{abs(tugas['hari_menuju_deadline'])}h"
+        bobot = f"{tugas['bobot']:.2f}"
+        detail_bobot = f"K:{tugas['detail_bobot']['kesulitan']} T:{tugas['detail_bobot']['klasifikasi']} D:{tugas['detail_bobot']['deadline']}"
+        
+        print(f"{i:<4} | {nama:<25} | {klasifikasi:<12} | {deadline:<10} | {kesulitan:<8} | {hari_menuju:<6} | {bobot:<6} | {detail_bobot}")
+    
+    print("=" * 105)
+    print("\nKETERANGAN:")
+    print("Kesulitan    : (1=Mudah, 2=Sedang, 3=Susah)")
+    print("Tipe         : (1=Tugas Harian, 2=UTS, 3=UAS)")
+    print("Deadline     : (1=Jauh, 2=14-8h, 3=7-4h, 4=3-0h, 5=Lewat)")
 
 def pencarian_tugas():
     while True:
@@ -199,7 +351,7 @@ def pencarian_tugas():
             hasil = [tugas for tugas in task if keyword in tugas['tingkat kesulitan'].lower()]
             judul = f"Hasil Pencarian untuk Tingkat Kesulitan: '{keyword}'"
         elif pilihan == '5':
-            break
+            return
         else:
             print("Pilihan tidak valid!")
             input("Tekan Enter untuk melanjutkan...")
@@ -230,25 +382,21 @@ def pengingat_deadline():
     
     for tugas in task:
         try:
-            # Parse tanggal deadline dari string ke objek date
             deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
             
-            # Hitung selisih hari antara deadline dan hari ini
             selisih_hari = (deadline_date - hari_ini).days
             
-            # Kategorikan tugas
             if selisih_hari < 0:
                 deadline_lewat.append((tugas, abs(selisih_hari)))
-            elif 0 <= selisih_hari <= 7:  # Deadline dalam 7 hari ke depan
+            elif 0 <= selisih_hari <= 7:
                 deadline_terdekat.append((tugas, selisih_hari))
                 
         except ValueError:
             print(f"Format deadline tidak valid untuk tugas: {tugas['nama']}")
             continue
     
-    # Tampilkan tugas yang sudah lewat deadline
     if deadline_lewat:
-        print("\n⚠️ TUGAS YANG SUDAH LEWAT DEADLINE:")
+        print("\n TUGAS YANG SUDAH LEWAT DEADLINE:")
         print("=" * 50)
         for tugas, hari_lewat in sorted(deadline_lewat, key=lambda x: x[1]):
             print(f"🔴 {tugas['nama']} (Lewat {hari_lewat} hari)")
@@ -257,11 +405,10 @@ def pengingat_deadline():
             print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
             print("-" * 50)
     else:
-        print("\n✅ Tidak ada tugas yang lewat deadline")
-    
-    # Tampilkan tugas yang mendekati deadline
+        print("\n Tidak ada tugas yang lewat deadline")
+
     if deadline_terdekat:
-        print("\n🔔 TUGAS YANG MENDEKATI DEADLINE:")
+        print("\n TUGAS YANG MENDEKATI DEADLINE:")
         print("=" * 50)
         for tugas, hari_menuju in sorted(deadline_terdekat, key=lambda x: x[1]):
             print(f"🟡 {tugas['nama']} ({hari_menuju} hari lagi)")
@@ -270,14 +417,13 @@ def pengingat_deadline():
             print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
             print("-" * 50)
     else:
-        print("\n🎉 Tidak ada tugas yang mendekati deadline dalam 7 hari ke depan")
-    
-    # Tampilkan tugas yang masih jauh deadline-nya
+        print("\n Tidak ada tugas yang mendekati deadline dalam 7 hari ke depan")
+
     tugas_jauh = [t for t in task 
                  if datetime.strptime(t['deadline'], '%d-%m-%Y').date() - hari_ini > timedelta(days=7)]
     
     if tugas_jauh:
-        print("\n📅 TUGAS DENGAN DEADLINE JAUH:")
+        print("\n TUGAS DENGAN DEADLINE JAUH:")
         print("=" * 50)
         for tugas in tugas_jauh:
             deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
@@ -285,38 +431,53 @@ def pengingat_deadline():
             print(f"🟢 {tugas['nama']} ({selisih_hari} hari lagi)")
             print(f"   Deadline: {tugas['deadline']}")
             print("-" * 50)
-    
-    input("\nTekan Enter untuk kembali ke menu utama...")
-    menu_utama()
+
+    return
 
 def menu_utama():
+    while True:
+        clear_screen()
+        print("=== MENU UTAMA TASKGUARD ===")
+        print("1. Pencatatan Tugas")
+        print("2. Pengurutan dan Prioritas Tugas")
+        print("3. Pencarian Tugas")
+        print("4. Pengingat Deadline Tugas")
+        print("5. Keluar")
+
+        pilihan = input("Pilih fitur (1-5): ")
+
+        clear_screen()
+
+        if pilihan == '1':
+            submenu_pencatatan()
+        elif pilihan == '2':
+            pengurutan_dan_prioritas_tugas()
+        elif pilihan == '3':
+            pencarian_tugas()
+        elif pilihan == '4':
+            pengingat_deadline()
+        elif pilihan == '5':
+            print("Terima kasih telah menggunakan TASKGUARD!")
+            break
+        else:
+            print("Pilihan tidak valid. Silakan pilih angka 1-5.")
+
+        if pilihan != '5':
+            input("\nTekan Enter untuk kembali ke menu...")
+
+def tampilkan_splash_screen():
     clear_screen()
+    print("\n" * 5)
+    print(" " * 15 + "=================================")
+    print(" " * 15 + "|                               |")
+    print(" " * 15 + "|           TASKGUARD           |")
+    print(" " * 15 + "|    Manajemen Tugas Mahasiswa  |")
+    print(" " * 15 + "|                               |")
+    print(" " * 15 + "=================================")
+    print("\n" * 5)
+    print(" " * 17 + "Tekan Enter untuk memulai...")
+    input()
 
-    print("=== MENU UTAMA TASKGUARD ===")
-    print("1. Pencatatan Tugas")
-    print("2. Pengurutan dan Prioritas Tugas")
-    print("3. Pencarian Tugas")
-    print("4. Pengingat Deadline Tugas")
-    print("5. Keluar")
-
-    pilihan = input("Pilih fitur (1-5): ")
-
-    clear_screen()
-
-    if pilihan == '1':
-        submenu_pencatatan()
-    elif pilihan == '2':
-        print("[Pengurutan dan Prioritas Tugas] Coming Soon...")
-    elif pilihan == '3':
-        pencarian_tugas()
-    elif pilihan == '4':
-        pengingat_deadline()
-    elif pilihan == '5':
-        print("Terima kasih telah menggunakan TASKGUARD!")
-        return
-    else:
-        print("Pilihan tidak valid. Silakan pilih angka 1-5.")
-
-    input("\nTekan Enter untuk kembali ke menu...")
-    menu_utama()
+tampilkan_splash_screen()
+clear_screen()
 menu_utama()
