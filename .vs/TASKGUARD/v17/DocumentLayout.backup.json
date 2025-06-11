@@ -18,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 300,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -49,10 +49,6 @@
               "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "TASK.csv",
@@ -60,7 +56,7 @@
               "RelativeDocumentMoniker": "TASK.csv",
               "ToolTip": "C:\\Users\\LENOVO\\source\\repos\\TASKGUARD\\TASK.csv",
               "RelativeToolTip": "TASK.csv",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAwwA4AAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002120|",
               "WhenOpened": "2025-06-10T06:04:21.977Z",
               "EditorCaption": ""
@@ -73,7 +69,7 @@
               "RelativeDocumentMoniker": "TASKGUARD.py",
               "ToolTip": "C:\\Users\\LENOVO\\source\\repos\\TASKGUARD\\TASKGUARD.py",
               "RelativeToolTip": "TASKGUARD.py",
-              "ViewState": "AgIAAB8BAAAAAAAAAAAuwCEBAAArAAAAAAAAAA==",
+              "ViewState": "AgIAACsBAAAAAAAAAAAUwE0BAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2025-06-10T06:04:07.712Z",
               "EditorCaption": ""

@@ -166,6 +166,12 @@ def fitur_rekomendasi_knapsack():
     clear_screen()
     print("REKOMENDASI TUGAS (KNAPSACK)")
     print("Fitur ini akan merekomendasikan tugas berdasarkan 'Kapasitas Usaha' Anda.")
+    print("=======================================================")
+    print("Rekomendasi Poin")
+    print("Capek = 1-5")
+    print("Santai = 5-10")
+    print("Normal = 10-15")
+    print("GACOR = 15+")
     try:
         kapasitas = int(input("\nMasukkan Kapasitas Poin Usaha Anda (misal: 10): "))
         if kapasitas <= 0:
@@ -301,8 +307,7 @@ def main():
         clear_screen()
         tampilkan_pengingat_deadline()
         print("\n=== MENU UTAMA TASKGUARD ===")
-        print("Struktur Program Baru yang Efisien\n")
-        print("1. Daftar Tugas (QUICKSORT & CRUD)")
+        print("1. Kelola Tugas (QUICKSORT & CRUD)")
         print("2. Rekomendasi Tugas (KNAPSACK)")
         print("3. Pencarian Cepat (BINARY SEARCH)")
         print("4. Bersihkan Tugas Lewat Deadline")
@@ -325,5 +330,4 @@ def main():
         if pilihan != '5':
             input("\nTekan Enter untuk kembali ke menu...")
 
-if __name__ == "__main__":
-    main()
+main()
