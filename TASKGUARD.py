@@ -1,483 +1,281 @@
 import os
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime
 
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-    
 CSV_FILE = 'TASK.csv'
 
-def muat_task():
-    task = []
-    if os.path.exists(CSV_FILE):
-        with open(CSV_FILE, mode='r', newline = '', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                task.append(row)
-    return task
+def clear_screen():
+    os.system('cls')
 
-def simpan_tugas(task):
+def muat_task():
+    tasks = []
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, mode='r', newline='', encoding='utf-8') as file:
+            try:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    tasks.append(row)
+            except (csv.Error, ValueError):
+                print("Peringatan: File CSV korup atau kosong. Membuat file baru.")
+    return tasks
+
+def simpan_tugas(tasks):
     with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as file:
         fieldnames = ['nama', 'klasifikasi', 'deadline', 'tingkat kesulitan']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(task)   
+        writer.writerows(tasks)
 
 task = muat_task()
 
 def tambah_tugas():
+    clear_screen()
     print("=== Tambah Tugas ===")
-    print("Ketik 'batal' kapan saja untuk membatalkan penambahan tugas\n")
+    print("Ketik 'batal' kapan saja untuk membatalkan.\n")
     
-    while True:
-        nama = input("Nama Tugas: ").strip()
-        if nama.lower() == 'batal':
-            print("Penambahan tugas dibatalkan")
-            return
-        if nama == "":
-            print("Nama tidak boleh kosong")
-        elif nama.isdigit():
-            print("Nama tidak boleh angka saja")
-        else:
-            break
-            
-    while True:
-        print("\nPilihan klasifikasi: Tugas harian, UTS, UAS")
-        klasifikasi = input("Klasifikasi Tugas: ").strip()
-        if klasifikasi.lower() == 'batal':
-            print("Penambahan tugas dibatalkan")
-            return
-        if klasifikasi == "":
-            print("Klasifikasi tidak boleh kosong")
-        elif klasifikasi.isdigit():
-            print("Klasifikasi tidak boleh berupa angka")
-        elif klasifikasi.lower() not in ['tugas harian', 'uts', 'uas']:
-            print("Pilihan tidak valid. Harap pilih dari: Tugas harian, UTS, UAS")
-        else:
-            break
+    nama = input("Nama Tugas: ").strip()
+    if not nama or nama.lower() == 'batal': return
+
+    klasifikasi = input("Klasifikasi Tugas (Tugas harian, UTS, UAS): ").strip()
+    if not klasifikasi or klasifikasi.lower() == 'batal': return
 
     while True:
-        deadline = input("\nDeadline (DD-MM-YYYY): ").strip()
-        if deadline.lower() == 'batal':
-            print("Penambahan tugas dibatalkan")
-            return
-        if deadline == "":
-            print("Deadline tidak boleh kosong")
-            continue
+        deadline_str = input("Deadline (DD-MM-YYYY): ").strip()
+        if not deadline_str or deadline_str.lower() == 'batal': return
         try:
-            datetime.strptime(deadline, '%d-%m-%Y')
+            deadline_obj = datetime.strptime(deadline_str, '%d-%m-%Y').date()
+            if deadline_obj < datetime.now().date():
+                print("Error: Deadline tidak boleh tanggal yang sudah lewat. Silakan coba lagi.")
+                continue
             break
         except ValueError:
-            print("Format tanggal tidak valid. Gunakan DD-MM-YYYY")
-
-    while True:
-        print("\nPilihan tingkat kesulitan: mudah, sedang, susah")
-        tingkat_kesulitan = input("Tingkat Kesulitan: ").strip()
-        if tingkat_kesulitan.lower() == 'batal':
-            print("Penambahan tugas dibatalkan")
-            return
-        if tingkat_kesulitan == "":
-            print("Tingkat kesulitan tidak boleh kosong")
-        elif tingkat_kesulitan.isdigit():
-            print("Tingkat kesulitan tidak boleh berupa angka")
-        elif tingkat_kesulitan.lower() not in ['mudah', 'sedang', 'susah']:
-            print("Pilihan tidak valid. Harap pilih dari: mudah, sedang, susah")
-        else:
-            break
-
-    print(f"\nRingkasan Tugas:")
-    print(f"Nama: {nama}")
-    print(f"Klasifikasi: {klasifikasi}")
-    print(f"Deadline: {deadline}")
-    print(f"Tingkat Kesulitan: {tingkat_kesulitan}")
+            print("Error: Format tanggal tidak valid. Gunakan DD-MM-YYYY.")
     
-    while True:
-        konfirmasi = input("\nSimpan tugas ini? (ya/tidak): ").lower()
-        if konfirmasi == 'batal' or konfirmasi == 'tidak':
-            print("Penambahan tugas dibatalkan")
-            return
-        elif konfirmasi == 'ya':
-            break
-        else:
-            print("Pilihan tidak valid. Ketik 'ya' atau 'tidak'")
-
-    tugas = {
-        "nama": nama,
-        "klasifikasi": klasifikasi,
-        "deadline": deadline,
-        "tingkat kesulitan": tingkat_kesulitan
-    }
+    tingkat_kesulitan = input("Tingkat Kesulitan (mudah, sedang, susah): ").strip()
+    if not tingkat_kesulitan or tingkat_kesulitan.lower() == 'batal': return
     
-    task.append(tugas)
+    tugas_baru = {"nama": nama, "klasifikasi": klasifikasi, "deadline": deadline_str, "tingkat kesulitan": tingkat_kesulitan}
+    task.append(tugas_baru)
     simpan_tugas(task)
-    print("\n✓ Tugas berhasil ditambahkan")
-    
+    print("\n✓ Tugas berhasil ditambahkan!")
+
 def lihat_tugas():
+    clear_screen()
     print("\nDAFTAR TUGAS")
     print("=" * 70)
     if not task:
-        print("Tidak ada tugas yang tersedia")
-        print("=" * 70)
-        return
-
-    print(f"{'No.':<4} | {'Nama Tugas':<20} | {'Klasifikasi':<12} | {'Deadline':<10} | {'Kesulitan':<10}")
-    print("-" * 70)
-
-    for i, tugas in enumerate(task, 1):
-        nama = tugas['nama'][:18] + '..' if len(tugas['nama']) > 20 else tugas['nama']
-        klasifikasi = tugas['klasifikasi'][:10] + '..' if len(tugas['klasifikasi']) > 12 else tugas['klasifikasi']
-        deadline = tugas['deadline']
-        kesulitan = tugas['tingkat kesulitan'][:8] + '..' if len(tugas['tingkat kesulitan']) > 10 else tugas['tingkat kesulitan']
-        
-        print(f"{i:<4} | {nama:<20} | {klasifikasi:<12} | {deadline:<10} | {kesulitan:<10}")
-    
+        print("Tidak ada tugas yang tersedia.")
+    else:
+        print(f"{'No.':<4} | {'Nama Tugas':<20} | {'Klasifikasi':<12} | {'Deadline':<10} | {'Kesulitan':<10}")
+        print("-" * 70)
+        for i, t in enumerate(task, 1):
+            print(f"{i:<4} | {t['nama']:<20} | {t['klasifikasi']:<12} | {t['deadline']:<10} | {t['tingkat kesulitan']:<10}")
     print("=" * 70)
 
 def edit_tugas():
+    clear_screen()
     lihat_tugas()
-    if not task:
-        return
+    if not task: return
     try:
-        idx =int(input("Pilih nomer tugas yg ingin di edit: "))-1
+        idx = int(input("\nPilih nomor tugas untuk di-edit: ")) - 1
         if 0 <= idx < len(task):
-            print("Kosongkan bila nilai tidak ingin diubah")
-            nama = input(f"Nama: [{task[idx]['nama']}]: Nama baru: ") or task[idx]['nama']
-            klasifikasi = input(f"Klasifikasi: [{task[idx]['klasifikasi']}]: Klasifikasi baru: ") or task[idx]['klasifikasi']
-            deadline = input(f"Deadline: [{task[idx]['deadline']}]: Deadline baru: ") or task[idx]['deadline']
-            tingkat_kesulitan = input(f"Tingkat kesulitan: [{task[idx]['tingkat kesulitan']}]: Tingkat kesulitan baru: ") or task[idx]['tingkat kesulitan']
-            
-            task[idx]={
-                "nama": nama,
-                "klasifikasi": klasifikasi,
-                "deadline": deadline,
-                "tingkat kesulitan": tingkat_kesulitan
-                
-            }
-
+            print("\nKosongkan jika tidak ingin diubah.")
+            t = task[idx]
+            nama_baru = input(f"Nama [{t['nama']}]: ") or t['nama']
+            task[idx].update({"nama": nama_baru})
             simpan_tugas(task)
-            print("Tugas Berhasil Diperbarui")
+            print("\n✓ Tugas berhasil diperbarui!")
         else:
-            print("Nomor Tugas Tidak Ditemukan")
+            print("\nNomor tugas tidak valid.")
     except ValueError:
-        print("Input Tidak Valid")
-        
+        print("\nInput tidak valid.")
+
 def hapus_tugas():
+    clear_screen()
     lihat_tugas()
-    if not task:
-        return
+    if not task: return
     try:
-        idx = int(input("Pilih nomer tugas yg ingin dihapus: "))-1
+        idx = int(input("\nPilih nomor tugas untuk dihapus: ")) - 1
         if 0 <= idx < len(task):
             del task[idx]
             simpan_tugas(task)
-            print("Tugas Berhasil Dihapus")
+            print("\n✓ Tugas berhasil dihapus!")
         else:
-            print("Nomor Tugas Tidak Ditemukan")
+            print("\nNomor tugas tidak valid.")
     except ValueError:
-        print("Input Tidak Valid")
-        
-def submenu_pencatatan():
-    while True:
-        clear_screen()
-        print("=== Pencatatan Tugas ===")
-        print("1. Tambah Tugas")
-        print("2. Lihat Tugas")
-        print("3. Edit Tugas")
-        print("4. Hapus Tugas")
-        print("5. Kembali ke Menu Utama")
-        
-        pilihan = input("Pilih (1-5): ")
-        
-        clear_screen()
-        
-        if pilihan == '1':
-            tambah_tugas()
-        elif pilihan == '2':
-            lihat_tugas()
-        elif pilihan == '3':
-            edit_tugas()
-        elif pilihan == '4':
-            hapus_tugas()
-        elif pilihan == '5':
-            break
-        else:
-            print("Input Tidak Valid")
-            
-        if pilihan != '5':
-            input("Tekan Enter untuk melanjutkan")
+        print("\nInput tidak valid.")
+
+def hitung_nilai_prioritas(tugas_list):
+    hari_ini = datetime.now().date()
+    tugas_berbobot = []
+    bobot_map = {'kesulitan': {'susah': 3, 'sedang': 2, 'mudah': 1}, 'klasifikasi': {'uas': 3, 'uts': 2, 'tugas harian': 1}}
+    for t in tugas_list:
+        try:
+            deadline_date = datetime.strptime(t['deadline'], '%d-%m-%Y').date()
+            selisih_hari = (deadline_date - hari_ini).days
+            bobot_kesulitan = bobot_map['kesulitan'].get(t['tingkat kesulitan'].lower(), 1)
+            bobot_klasifikasi = bobot_map['klasifikasi'].get(t['klasifikasi'].lower(), 1)
+            if selisih_hari < 0: bobot_deadline = 5
+            elif selisih_hari <= 3: bobot_deadline = 4
+            elif selisih_hari <= 7: bobot_deadline = 3
+            else: bobot_deadline = 1
+            nilai_prioritas = (bobot_kesulitan * 0.4) + (bobot_klasifikasi * 0.3) + (bobot_deadline * 0.3)
+            tugas_berbobot.append({'tugas': t, 'prioritas': nilai_prioritas})
+        except (ValueError, KeyError): continue
+    return tugas_berbobot
+
+def quick_sort_tugas(tugas_list):
+    if len(tugas_list) <= 1: return tugas_list
+    pivot = tugas_list[len(tugas_list) // 2]
+    kiri = [x for x in tugas_list if x['prioritas'] > pivot['prioritas']]
+    tengah = [x for x in tugas_list if x['prioritas'] == pivot['prioritas']]
+    kanan = [x for x in tugas_list if x['prioritas'] < pivot['prioritas']]
+    return quick_sort_tugas(kiri) + tengah + quick_sort_tugas(kanan)
 
 def pengurutan_dan_prioritas_tugas():
     clear_screen()
-    print("=== PENGURUTAN DAN PRIORITAS TUGAS ===")
-    
+    print("=== TUGAS BERDASARKAN PRIORITAS (QUICKSORT) ===")
     if not task:
-        print("Tidak ada tugas yang tersedia.")
-        input("\nTekan Enter untuk kembali ke menu utama...")
+        print("Tidak ada tugas untuk diurutkan.")
         return
+    tugas_dengan_prioritas = hitung_nilai_prioritas(task)
+    tugas_terurut = quick_sort_tugas(tugas_dengan_prioritas)
+    print("-" * 60)
+    for i, item in enumerate(tugas_terurut, 1):
+        t = item['tugas']
+        print(f"{i}. {t['nama']} (Prioritas: {item['prioritas']:.2f})")
+        print(f"   Deadline: {t['deadline']} | Kesulitan: {t['tingkat kesulitan']}")
+    print("-" * 60)
 
-    tugas_dengan_bobot = hitung_bobot_tugas(task)
-
-    tugas_terurut = quick_sort_tugas(tugas_dengan_bobot)
-    
-    tampilkan_tugas_terurut(tugas_terurut)
-    
-    return
-
-def hitung_bobot_tugas(tugas_list):
-    hari_ini = datetime.now().date()
-    tugas_dengan_bobot = []
-    
-    for tugas in tugas_list:
-        try:
-            deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
-            selisih_hari = (deadline_date - hari_ini).days
-            
-            if tugas['tingkat kesulitan'].lower() == 'susah':
-                bobot_kesulitan = 3
-            elif tugas['tingkat kesulitan'].lower() == 'sedang':
-                bobot_kesulitan = 2
-            else:
-                bobot_kesulitan = 1
-            
-            if tugas['klasifikasi'].lower() == 'uas':
-                bobot_klasifikasi = 3
-            elif tugas['klasifikasi'].lower() == 'uts':
-                bobot_klasifikasi = 2
-            else:
-                bobot_klasifikasi = 1
-
-            if selisih_hari <= 0:
-                bobot_deadline = 5
-            elif selisih_hari <= 3: 
-                bobot_deadline = 4
-            elif selisih_hari <= 7: 
-                bobot_deadline = 3
-            elif selisih_hari <= 14:
-                bobot_deadline = 2
-            else:
-                bobot_deadline = 1
-
-            total_bobot = (bobot_kesulitan * 0.4) + (bobot_klasifikasi * 0.3) + (bobot_deadline * 0.3)
-
-            tugas_dengan_bobot.append({
-                'tugas': tugas,
-                'bobot': total_bobot,
-                'detail_bobot': {
-                    'kesulitan': bobot_kesulitan,
-                    'klasifikasi': bobot_klasifikasi,
-                    'deadline': bobot_deadline
-                },
-                'hari_menuju_deadline': selisih_hari
-            })
-            
-        except ValueError:
-            print(f"Format deadline tidak valid untuk tugas: {tugas['nama']}")
-            continue
-    
-    return tugas_dengan_bobot
-
-def quick_sort_tugas(tugas_list):
-    if len(tugas_list) <= 1:
-        return tugas_list
-    
-    pivot = tugas_list[len(tugas_list) // 2]
-    left = [x for x in tugas_list if x['bobot'] > pivot['bobot']]
-    middle = [x for x in tugas_list if x['bobot'] == pivot['bobot']]
-    right = [x for x in tugas_list if x['bobot'] < pivot['bobot']]
-    
-    return quick_sort_tugas(left) + middle + quick_sort_tugas(right)
-
-def tampilkan_tugas_terurut(tugas_terurut):
-    print("\nDAFTAR TUGAS BERDASARKAN PRIORITAS")
-    print("=" * 105)
-    print(f"{'No.':<4} | {'Nama Tugas':<25} | {'Klasifikasi':<12} | {'Deadline':<10} | {'Kesulitan':<8} | {'Hari':<6} | {'Bobot':<6} | Detail Bobot")
-    print("-" * 105)
-    
-    for i, tugas in enumerate(tugas_terurut, 1):
-        nama = (tugas['tugas']['nama'][:22] + '..') if len(tugas['tugas']['nama']) > 24 else tugas['tugas']['nama']
-        klasifikasi = tugas['tugas']['klasifikasi'][:10] + ('..' if len(tugas['tugas']['klasifikasi']) > 10 else '')
-        deadline = tugas['tugas']['deadline']
-        kesulitan = tugas['tugas']['tingkat kesulitan'][:6]
-        hari_menuju = f"{tugas['hari_menuju_deadline']}h" if tugas['hari_menuju_deadline'] >= 0 else f"-{abs(tugas['hari_menuju_deadline'])}h"
-        bobot = f"{tugas['bobot']:.2f}"
-        detail_bobot = f"K:{tugas['detail_bobot']['kesulitan']} T:{tugas['detail_bobot']['klasifikasi']} D:{tugas['detail_bobot']['deadline']}"
-        
-        print(f"{i:<4} | {nama:<25} | {klasifikasi:<12} | {deadline:<10} | {kesulitan:<8} | {hari_menuju:<6} | {bobot:<6} | {detail_bobot}")
-    
-    print("=" * 105)
-    print("\nKETERANGAN:")
-    print("Kesulitan    : (1=Mudah, 2=Sedang, 3=Susah)")
-    print("Tipe         : (1=Tugas Harian, 2=UTS, 3=UAS)")
-    print("Deadline     : (1=Jauh, 2=14-8h, 3=7-4h, 4=3-0h, 5=Lewat)")
+def binary_search(data, target, key):
+    low, high = 0, len(data) - 1
+    hasil = []
+    while low <= high:
+        mid = (low + high) // 2
+        mid_val = data[mid][key].lower()
+        if mid_val == target.lower():
+            hasil.append(data[mid])
+            l, r = mid - 1, mid + 1
+            while l >= 0 and data[l][key].lower() == target.lower(): hasil.append(data[l]); l -= 1
+            while r < len(data) and data[r][key].lower() == target.lower(): hasil.append(data[r]); r += 1
+            return hasil
+        elif mid_val < target.lower(): low = mid + 1
+        else: high = mid - 1
+    return hasil
 
 def pencarian_tugas():
-    while True:
-        clear_screen()
-        print("=== Pencarian Tugas ===")
-        print("1. Cari berdasarkan Nama")
-        print("2. Cari berdasarkan Klasifikasi")
-        print("3. Cari berdasarkan Deadline")
-        print("4. Cari berdasarkan Tingkat Kesulitan")
-        print("5. Kembali ke Menu Utama")
-        
-        pilihan = input("Pilih jenis pencarian (1-5): ")
-        
-        clear_screen()
-        
-        if pilihan == '1':
-            keyword = input("Masukkan nama tugas yang dicari: ").lower()
-            hasil = [tugas for tugas in task if keyword in tugas['nama'].lower()]
-            judul = f"Hasil Pencarian untuk Nama: '{keyword}'"
-        elif pilihan == '2':
-            print("Pilihan klasifikasi: Tugas harian, UTS, UAS")
-            keyword = input("Masukkan klasifikasi tugas: ").lower()
-            hasil = [tugas for tugas in task if keyword in tugas['klasifikasi'].lower()]
-            judul = f"Hasil Pencarian untuk Klasifikasi: '{keyword}'"
-        elif pilihan == '3':
-            keyword = input("Masukkan deadline (DD-MM-YYYY atau bulan/tahun): ")
-            try:
-                hasil = [tugas for tugas in task if keyword in tugas['deadline']]
-                if not hasil:
-                    bulan_tahun = keyword.split('-')[1:] if '-' in keyword else keyword.split('/')[1:]
-                    if len(bulan_tahun) >= 2:
-                        hasil = [tugas for tugas in task if '-'.join(bulan_tahun) in tugas['deadline']]
-                judul = f"Hasil Pencarian untuk Deadline: '{keyword}'"
-            except:
-                hasil = []
-                judul = "Format deadline tidak valid"
-        elif pilihan == '4':
-            print("Pilihan: mudah, sedang, susah")
-            keyword = input("Masukkan tingkat kesulitan: ").lower()
-            hasil = [tugas for tugas in task if keyword in tugas['tingkat kesulitan'].lower()]
-            judul = f"Hasil Pencarian untuk Tingkat Kesulitan: '{keyword}'"
-        elif pilihan == '5':
-            return
-        else:
-            print("Pilihan tidak valid!")
-            input("Tekan Enter untuk melanjutkan...")
-            continue
-
-        clear_screen()
-        print(judul)
-        print("-" * 50)
-        if not hasil:
-            print("Tidak ditemukan tugas yang sesuai!")
-        else:
-            for i, tugas in enumerate(hasil, 1):
-                print(f"{i}. Nama: {tugas['nama']}")
-                print(f"   Klasifikasi: {tugas['klasifikasi']}")
-                print(f"   Deadline: {tugas['deadline']}")
-                print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
-                print("-" * 50)
-        
-        input("\nTekan Enter untuk melanjutkan...")
-
-def pengingat_deadline():
     clear_screen()
-    print("=== PENGINGAT DEADLINE ===")
-    
+    print("=== PENCARIAN TUGAS (BINARY SEARCH) ===")
+    print("1. Cari berdasarkan Nama\n2. Cari berdasarkan Klasifikasi\n3. Cari berdasarkan Tingkat Kesulitan")
+    pilihan = input("Pilih kriteria (1-3): ")
+    kriteria_map = {'1': 'nama', '2': 'klasifikasi', '3': 'tingkat kesulitan'}
+    if pilihan not in kriteria_map:
+        print("Pilihan tidak valid."); return
+    key = kriteria_map[pilihan]
+    keyword = input(f"Masukkan {key} yang dicari: ").strip()
+    if not keyword: return
+    data_terurut = sorted(task, key=lambda x: x[key].lower())
+    hasil = binary_search(data_terurut, keyword, key)
+    clear_screen()
+    print(f"Hasil Pencarian untuk '{keyword}':")
+    print("-" * 50)
+    if not hasil:
+        print("Tidak ada tugas yang cocok ditemukan.")
+    else:
+        for i, t in enumerate(hasil, 1):
+            print(f"{i}. {t['nama']} | {t['klasifikasi']} | {t['deadline']} | {t['tingkat kesulitan']}")
+    print("-" * 50)
+
+
+def tampilkan_pengingat_deadline():
     hari_ini = datetime.now().date()
-    deadline_terdekat = []
-    deadline_lewat = []
-    
-    for tugas in task:
+    batas_hari = 2
+    tugas_mendesak = []
+    for t in task:
         try:
-            deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
-            
+            deadline_date = datetime.strptime(t['deadline'], '%d-%m-%Y').date()
             selisih_hari = (deadline_date - hari_ini).days
-            
-            if selisih_hari < 0:
-                deadline_lewat.append((tugas, abs(selisih_hari)))
-            elif 0 <= selisih_hari <= 7:
-                deadline_terdekat.append((tugas, selisih_hari))
-                
-        except ValueError:
-            print(f"Format deadline tidak valid untuk tugas: {tugas['nama']}")
-            continue
+            if 0 <= selisih_hari <= batas_hari:
+                tugas_mendesak.append((t, selisih_hari))
+        except (ValueError, KeyError): continue
+    if tugas_mendesak:
+        print("🔔 PENGINGAT DEADLINE 🔔")
+        print("-" * 30)
+        for t, hari in sorted(tugas_mendesak, key=lambda x: x[1]):
+            if hari == 0: pesan = "(Hari Ini!)"
+            elif hari == 1: pesan = "(Besok!)"
+            else: pesan = f"({hari} hari lagi)"
+            print(f"🟡 {t['nama']} {pesan}")
+        print("-" * 30)
+        print()
+
+def bersihkan_tugas_lewat():
+    clear_screen()
+    print("=== BERSIHKAN TUGAS LEWAT DEADLINE ===")
+    hari_ini = datetime.now().date()
+    tugas_lewat = []
+    tugas_aman = []
+
+    for t in task:
+        try:
+            deadline_obj = datetime.strptime(t['deadline'], '%d-%m-%Y').date()
+            if deadline_obj < hari_ini:
+                tugas_lewat.append(t)
+            else:
+                tugas_aman.append(t)
+        except (ValueError, KeyError):
+            tugas_aman.append(t)
+
+    if not tugas_lewat:
+        print("Tidak ada tugas yang sudah lewat deadline. Bersih!")
+        return
+
+    print("Tugas berikut sudah lewat deadline:")
+    for i, t in enumerate(tugas_lewat, 1):
+        print(f"{i}. {t['nama']} (Deadline: {t['deadline']})")
     
-    if deadline_lewat:
-        print("\n TUGAS YANG SUDAH LEWAT DEADLINE:")
-        print("=" * 50)
-        for tugas, hari_lewat in sorted(deadline_lewat, key=lambda x: x[1]):
-            print(f"🔴 {tugas['nama']} (Lewat {hari_lewat} hari)")
-            print(f"   Deadline: {tugas['deadline']}")
-            print(f"   Klasifikasi: {tugas['klasifikasi']}")
-            print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
-            print("-" * 50)
+    konfirmasi = input(f"\nAnda yakin ingin menghapus {len(tugas_lewat)} tugas ini secara permanen? (ya/tidak): ").lower()
+    if konfirmasi == 'ya':
+        task[:] = tugas_aman
+        simpan_tugas(task)
+        print(f"\n✓ {len(tugas_lewat)} tugas berhasil dihapus.")
     else:
-        print("\n Tidak ada tugas yang lewat deadline")
+        print("\nPenghapusan dibatalkan.")
 
-    if deadline_terdekat:
-        print("\n TUGAS YANG MENDEKATI DEADLINE:")
-        print("=" * 50)
-        for tugas, hari_menuju in sorted(deadline_terdekat, key=lambda x: x[1]):
-            print(f"🟡 {tugas['nama']} ({hari_menuju} hari lagi)")
-            print(f"   Deadline: {tugas['deadline']}")
-            print(f"   Klasifikasi: {tugas['klasifikasi']}")
-            print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
-            print("-" * 50)
-    else:
-        print("\n Tidak ada tugas yang mendekati deadline dalam 7 hari ke depan")
-
-    tugas_jauh = [t for t in task 
-                 if datetime.strptime(t['deadline'], '%d-%m-%Y').date() - hari_ini > timedelta(days=7)]
-    
-    if tugas_jauh:
-        print("\n TUGAS DENGAN DEADLINE JAUH:")
-        print("=" * 50)
-        for tugas in tugas_jauh:
-            deadline_date = datetime.strptime(tugas['deadline'], '%d-%m-%Y').date()
-            selisih_hari = (deadline_date - hari_ini).days
-            print(f"🟢 {tugas['nama']} ({selisih_hari} hari lagi)")
-            print(f"   Deadline: {tugas['deadline']}")
-            print("-" * 50)
-
-    return
-
-def menu_utama():
-    while True:
+def submenu_pencatatan():
+    pilihan = ''
+    while pilihan != '5':
         clear_screen()
+        print("=== Pencatatan Tugas ===")
+        print("1. Tambah Tugas\n2. Lihat Tugas\n3. Edit Tugas\n4. Hapus Tugas\n5. Kembali")
+        pilihan = input("Pilih (1-5): ")
+        if pilihan == '1': tambah_tugas()
+        elif pilihan == '2': lihat_tugas()
+        elif pilihan == '3': edit_tugas()
+        elif pilihan == '4': hapus_tugas()
+        if pilihan in '1234': input("\nTekan Enter untuk melanjutkan...")
+
+def main():
+    pilihan = ''
+    while pilihan != '5':
+        clear_screen()
+        tampilkan_pengingat_deadline()
         print("=== MENU UTAMA TASKGUARD ===")
         print("1. Pencatatan Tugas")
-        print("2. Pengurutan dan Prioritas Tugas")
+        print("2. Prioritas & Pengurutan Tugas")
         print("3. Pencarian Tugas")
-        print("4. Pengingat Deadline Tugas")
+        print("4. Bersihkan Tugas Lewat Deadline")
         print("5. Keluar")
-
         pilihan = input("Pilih fitur (1-5): ")
 
-        clear_screen()
+        if pilihan == '1': submenu_pencatatan()
+        elif pilihan == '2': pengurutan_dan_prioritas_tugas()
+        elif pilihan == '3': pencarian_tugas()
+        elif pilihan == '4': bersihkan_tugas_lewat()
+        elif pilihan == '5': print("Terima kasih!")
+        else: print("Pilihan tidak valid.")
+        
+        if pilihan != '5': input("\nTekan Enter untuk kembali ke menu...")
 
-        if pilihan == '1':
-            submenu_pencatatan()
-        elif pilihan == '2':
-            pengurutan_dan_prioritas_tugas()
-        elif pilihan == '3':
-            pencarian_tugas()
-        elif pilihan == '4':
-            pengingat_deadline()
-        elif pilihan == '5':
-            print("Terima kasih telah menggunakan TASKGUARD!")
-            break
-        else:
-            print("Pilihan tidak valid. Silakan pilih angka 1-5.")
-
-        if pilihan != '5':
-            input("\nTekan Enter untuk kembali ke menu...")
-
-def tampilkan_splash_screen():
-    clear_screen()
-    print("\n" * 5)
-    print(" " * 15 + "=================================")
-    print(" " * 15 + "|                               |")
-    print(" " * 15 + "|           TASKGUARD           |")
-    print(" " * 15 + "|    Manajemen Tugas Mahasiswa  |")
-    print(" " * 15 + "|                               |")
-    print(" " * 15 + "=================================")
-    print("\n" * 5)
-    print(" " * 17 + "Tekan Enter untuk memulai...")
-    input()
-
-tampilkan_splash_screen()
-clear_screen()
-menu_utama()
+if __name__ == "__main__":
+    main()
