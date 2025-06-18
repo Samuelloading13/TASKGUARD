@@ -1,4 +1,4 @@
-import os
+﻿import os
 import csv
 from datetime import datetime
 
@@ -114,7 +114,7 @@ def tambah_tugas():
         deadline_str = input("Deadline (DD-MM-YYYY): ").strip()
         try:
             deadline_obj = datetime.strptime(deadline_str, '%d-%m-%Y').date()
-            if deadline_obj < datetime.now().date():
+            if deadline_obj < datetime.now().date(): 
                 print("Error: Deadline tidak boleh tanggal yang sudah lewat.")
                 continue
             break
@@ -162,44 +162,63 @@ def hapus_tugas():
     except ValueError:
         print("\nInput tidak valid.")
 
+def tampilkan_detail_tugas(tugas):
+    """Fungsi pembantu untuk menampilkan detail tugas."""
+    print(f"   Nama Tugas       : {tugas['nama']}")
+    print(f"   Klasifikasi      : {tugas['klasifikasi']}")
+    print(f"   Deadline         : {tugas['deadline']}")
+    print(f"   Tingkat Kesulitan: {tugas['tingkat kesulitan']}")
+
 def fitur_rekomendasi_knapsack():
     clear_screen()
     print("REKOMENDASI TUGAS (KNAPSACK)")
-    print("Fitur ini akan merekomendasikan tugas berdasarkan 'Kapasitas Usaha' Anda.")
     print("=======================================================")
-    print("Rekomendasi Poin")
-    print("Capek = 1-5")
-    print("Santai = 5-10")
-    print("Normal = 10-15")
-    print("GACOR = 15+")
+    print("Fitur ini akan merekomendasikan tugas terbaik berdasarkan 'Kapasitas Poin Energi' Anda.")
+    print("Setiap tugas memiliki 'Nilai Prioritas' (pentingnya) dan 'Poin Energi Dibutuhkan' (kesulitan).")
+    print("\n--- PANDUAN KAPASITAS POIN ENERGI ANDA ---")
+    print("  1-5 Poin   : Sedikit Energi (Cocok untuk tugas ringan)")
+    print("  5-10 Poin  : Energi Sedang (Cukup untuk tugas normal)")
+    print("  10-15 Poin : Energi Cukup Banyak (Bisa mengerjakan beberapa tugas penting)")
+    print("  15+ Poin   : Energi Berlimpah (Siap untuk tugas-tugas besar!)")
+    print("=======================================================")
     try:
-        kapasitas = int(input("\nMasukkan Kapasitas Poin Usaha Anda (misal: 10): "))
+        kapasitas = int(input("\nMasukkan Kapasitas Poin Energi Anda hari ini (misal: 10): "))
         if kapasitas <= 0:
-            print("Kapasitas harus lebih dari 0.")
+            print("Kapasitas harus lebih dari 0. Mohon masukkan angka yang valid.")
             return
     except ValueError:
-        print("Input tidak valid. Harap masukkan angka.")
+        print("Input tidak valid. Harap masukkan angka bulat untuk kapasitas energi Anda.")
         return
 
     items = []
     tugas_bernilai = hitung_nilai_prioritas(task)
     for item_berniali in tugas_bernilai:
         tugas_item = item_berniali['tugas']
-        items.append({'nama': tugas_item['nama'], 'nilai': item_berniali['nilai'], 'bobot': hitung_bobot_usaha(tugas_item)})
+        if 'tingkat kesulitan' in tugas_item and 'klasifikasi' in tugas_item:
+            items.append({'nama': tugas_item['nama'],
+                          'nilai': item_berniali['nilai'],
+                          'bobot': hitung_bobot_usaha(tugas_item),
+                          'detail': tugas_item})
 
     rekomendasi_terpilih = solve_knapsack(items, kapasitas)
     
-    print(f"\n--- Dengan Kapasitas {kapasitas} Poin Usaha, Berikut Rekomendasinya ---")
+    print(f"\n--- REKOMENDASI TUGAS UNTUK KAPASITAS {kapasitas} POIN ENERGI ---")
     if not rekomendasi_terpilih:
-        print("Tidak ada tugas yang bisa direkomendasikan. Mungkin kapasitas terlalu kecil.")
+        print("Tidak ada tugas yang bisa direkomendasikan dengan kapasitas energi Anda.")
+        print("Coba tingkatkan 'Kapasitas Poin Energi' Anda atau tambahkan tugas baru.")
     else:
         total_bobot = sum(item['bobot'] for item in rekomendasi_terpilih)
         total_nilai = sum(item['nilai'] for item in rekomendasi_terpilih)
+        print("\nBerikut adalah tugas-tugas yang disarankan untuk Anda kerjakan:")
+        print("-------------------------------------------------------------")
         for i, item in enumerate(rekomendasi_terpilih, 1):
-            print(f"{i}. {item['nama']} (Nilai: {item['nilai']:.2f}, Bobot: {item['bobot']})")
-        print("\n-------------------------------------------------------------")
-        print(f"Total Poin Usaha dari Rekomendasi: {total_bobot} / {kapasitas}")
-        print(f"Total Nilai Prioritas yang Didapat : {total_nilai:.2f}")
+            print(f"Tugas Rekomendasi Ke-{i}:")
+            tampilkan_detail_tugas(item['detail'])
+            print(f"   - Perkiraan Nilai Prioritas : {item['nilai']:.2f} (semakin tinggi, semakin penting)")
+            print(f"   - Perkiraan Energi Dibutuhkan: {item['bobot']} Poin (semakin tinggi, semakin banyak usaha)")
+            print("-------------------------------------------------------------")
+        print(f"\nTotal Energi yang akan Anda gunakan: {total_bobot} dari {kapasitas} Poin")
+        print(f"Total Prioritas yang berhasil Anda capai: {total_nilai:.2f} Poin")
 
 def fitur_lihat_terurut_quicksort():
     clear_screen()
@@ -307,10 +326,10 @@ def main():
         clear_screen()
         tampilkan_pengingat_deadline()
         print("\n=== MENU UTAMA TASKGUARD ===")
-        print("1. Kelola Tugas (QUICKSORT & CRUD)")
-        print("2. Rekomendasi Tugas (KNAPSACK)")
-        print("3. Pencarian Cepat (BINARY SEARCH)")
-        print("4. Bersihkan Tugas Lewat Deadline")
+        print("1. Kelola Tugas")
+        print("2. Rekomendasi Tugas")
+        print("3. Pencarian Cepat Tugas")
+        print("4. Bersihkan Tugas yang Sudah Lewat Deadline")
         print("5. Keluar")
         pilihan = input("Pilih fitur (1-5): ")
 
