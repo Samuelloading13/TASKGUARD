@@ -236,6 +236,28 @@ def fitur_lihat_terurut_quicksort():
         print(f"{i:<4} | {t['nama']:<25} | {item['nilai']:<10.2f} | {t['deadline']:<12}")
     print("-" * 70)
 
+    while True:
+        nama_tugas_pilihan = input("Masukkan nama tugas yang ingin Anda lihat spesifikasinya (atau 'kembali' untuk kembali): ").strip()
+        if nama_tugas_pilihan.lower() == 'kembali':
+            break
+
+        found_task = None
+        for item in tugas_terurut:
+            if item['tugas']['nama'].lower() == nama_tugas_pilihan.lower():
+                found_task = item['tugas']
+                break
+
+        if found_task:
+            clear_screen()
+            print("\n--- SPESIFIKASI TUGAS ---")
+            print(f"Nama Tugas: {found_task['nama']}")
+            print(f"Klasifikasi: {found_task['klasifikasi']}")
+            print(f"Deadline: {found_task['deadline']}")
+            print(f"Tingkat Kesulitan: {found_task.get('tingkat kesulitan', 'Tidak ditentukan')}")
+            print("-------------------------\n")
+        else:
+            print(f"Tugas dengan nama '{nama_tugas_pilihan}' tidak ditemukan. Mohon coba lagi.")
+
 def fitur_pencarian_binary_search():
     clear_screen()
     print("PENCARIAN CEPAT (BINARY SEARCH)")
